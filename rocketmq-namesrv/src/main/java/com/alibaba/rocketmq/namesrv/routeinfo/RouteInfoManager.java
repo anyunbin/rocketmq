@@ -56,10 +56,10 @@ import com.alibaba.rocketmq.remoting.common.RemotingUtil;
 public class RouteInfoManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NamesrvLoggerName);
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
-    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
-    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
-    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;  //topic在各个broker上的信息
+    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;  //brokerName对应broker主从信息以及地址
+    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable; //每个集群对应的所有brokerName
+    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable; //每个broker地址对应的存活信息
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
 
@@ -119,10 +119,10 @@ public class RouteInfoManager {
      * @return 如果是slave，则返回master的ha地址
      */
     public RegisterBrokerResult registerBroker(//
-            final String clusterName,// 1
-            final String brokerAddr,// 2
-            final String brokerName,// 3
-            final long brokerId,// 4
+            final String clusterName,// 1 集群名称
+            final String brokerAddr,// 2 broker地址
+            final String brokerName,// 3 broker名称
+            final long brokerId,// 4 主从
             final String haServerAddr,// 5
             final TopicConfigSerializeWrapper topicConfigWrapper,// 6
             final List<String> filterServerList, // 7
@@ -133,17 +133,16 @@ public class RouteInfoManager {
             try {
                 this.lock.writeLock().lockInterruptibly();
 
-                // 更新集群信息
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
                 if (null == brokerNames) {
                     brokerNames = new HashSet<String>();
                     this.clusterAddrTable.put(clusterName, brokerNames);
                 }
+                //更新 clusterAddrTable
                 brokerNames.add(brokerName);
 
                 boolean registerFirst = false;
 
-                // 更新主备信息
                 BrokerData brokerData = this.brokerAddrTable.get(brokerName);
                 if (null == brokerData) {
                     registerFirst = true;
@@ -154,10 +153,10 @@ public class RouteInfoManager {
 
                     this.brokerAddrTable.put(brokerName, brokerData);
                 }
+                //更新 brokerAddrTable
                 String oldAddr = brokerData.getBrokerAddrs().put(brokerId, brokerAddr);
                 registerFirst = registerFirst || (null == oldAddr);
 
-                // 更新Topic信息
                 if (null != topicConfigWrapper //
                         && MixAll.MASTER_ID == brokerId) {
                     if (this.isBrokerTopicConfigChanged(brokerAddr, topicConfigWrapper.getDataVersion())//
@@ -167,6 +166,7 @@ public class RouteInfoManager {
                         if (tcTable != null) {
                             for (String topic : tcTable.keySet()) {
                                 TopicConfig topicConfig = tcTable.get(topic);
+                                //更新 topicQueueTable
                                 this.createAndUpdateQueueData(brokerName, topicConfig);
                             }
                         }
@@ -272,6 +272,7 @@ public class RouteInfoManager {
     }
 
 
+    //当有Broker注册时　创建或更新 topicQueueTable<TopicName,List<QueueData>>
     private void createAndUpdateQueueData(final String brokerName, final TopicConfig topicConfig) {
         QueueData queueData = new QueueData();
         queueData.setBrokerName(brokerName);
@@ -281,22 +282,27 @@ public class RouteInfoManager {
         queueData.setTopicSynFlag(topicConfig.getTopicSysFlag());
 
         List<QueueData> queueDataList = this.topicQueueTable.get(topicConfig.getTopicName());
+        //topicQueueTable　还未有该Topic路由信息
         if (null == queueDataList) {
             queueDataList = new LinkedList<QueueData>();
             queueDataList.add(queueData);
             this.topicQueueTable.put(topicConfig.getTopicName(), queueDataList);
             log.info("new topic registerd, {} {}", topicConfig.getTopicName(), queueData);
         }
+        //topicQueueTable　有该Topic路由信息
         else {
             boolean addNewOne = true;
 
             Iterator<QueueData> it = queueDataList.iterator();
             while (it.hasNext()) {
                 QueueData qd = it.next();
+                //找到该BrokerName对应的QueueData topic-a -> broker-a -> QueueData
                 if (qd.getBrokerName().equals(brokerName)) {
+                    //相同
                     if (qd.equals(queueData)) {
                         addNewOne = false;
                     }
+                    //不同　则删除　下面还会重新加入
                     else {
                         log.info("topic changed, {} OLD: {} NEW: {}", topicConfig.getTopicName(), qd,
                             queueData);
@@ -405,6 +411,7 @@ public class RouteInfoManager {
     }
 
 
+    //根据Topic收集路由信息
     public TopicRouteData pickupTopicRouteData(final String topic) {
         TopicRouteData topicRouteData = new TopicRouteData();
         boolean foundQueueData = false;
@@ -701,8 +708,8 @@ public class RouteInfoManager {
             try {
                 this.lock.readLock().lockInterruptibly();
                 for (String cluster : clusterAddrTable.keySet()) {
-                    topicList.getTopicList().add(cluster);
-                    topicList.getTopicList().addAll(this.clusterAddrTable.get(cluster));
+                    topicList.getTopicList().add(cluster);  //将该集群的ClusterName放入
+                    topicList.getTopicList().addAll(this.clusterAddrTable.get(cluster)); //将该集群的所有BrokerName放入
                 }
 
                 // 随机取一台 broker

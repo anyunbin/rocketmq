@@ -19,12 +19,12 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 
 
 public class SimpleConsumerProducerTest {
-    private static final String TOPIC_TEST = "TopicTest-fundmng";
+    private static final String TOPIC_TEST = "TopicTest";
 
     @Test
     public void producerConsumerTest() throws MQClientException, InterruptedException {
-        System.setProperty("rocketmq.namesrv.domain", "jmenv.tbsite.alipay.net");
-
+        //System.setProperty("rocketmq.namesrv.domain", "jmenv.tbsite.alipay.net");
+        System.setProperty("rocketmq.namesrv.addr", "localhost:9876");
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("S_fundmng_demo_producer");
         DefaultMQProducer producer = new DefaultMQProducer("P_fundmng_demo_producer");
 
@@ -33,12 +33,10 @@ public class SimpleConsumerProducerTest {
 
         final AtomicLong lastReceivedMills = new AtomicLong(System.currentTimeMillis());
 
-        final AtomicLong consumeTimes = new AtomicLong(0);
-
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             public ConsumeConcurrentlyStatus consumeMessage(final List<MessageExt> msgs,
                                                             final ConsumeConcurrentlyContext context) {
-                System.out.println("Received" + consumeTimes.incrementAndGet() + "messages !");
+                System.out.println("Received " + msgs.get(0) + " messages !");
 
                 lastReceivedMills.set(System.currentTimeMillis());
 
@@ -49,11 +47,12 @@ public class SimpleConsumerProducerTest {
         consumer.start();
         producer.start();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100000; i++) {
             try {
                 Message msg = new Message(TOPIC_TEST, ("Hello RocketMQ " + i).getBytes());
                 SendResult sendResult = producer.send(msg);
                 System.out.println(sendResult);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 TimeUnit.SECONDS.sleep(1);
             }

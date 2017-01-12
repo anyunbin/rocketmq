@@ -31,6 +31,11 @@ import java.net.UnknownHostException;
 public class BrokerConfig {
     private String rocketmqHome = System.getProperty(MixAll.ROCKETMQ_HOME_PROPERTY,
         System.getenv(MixAll.ROCKETMQ_HOME_ENV));
+    /*
+    * NameSrv获取
+    * (1)java启动参数　-Drocketmq.namesrv.addr=192.168.0.1:9876;192.168.0.2:9876 使用System.getProperty获取
+    * (2)系统环境变量　export NAMESRV_ADDR=192.168.0.1:9876;192.168.0.2:9876　使用System.getenv获取
+    * */
     @ImportantField
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY,
         System.getenv(MixAll.NAMESRV_ADDR_ENV));

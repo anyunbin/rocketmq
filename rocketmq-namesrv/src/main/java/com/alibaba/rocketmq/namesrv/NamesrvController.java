@@ -47,9 +47,9 @@ public class NamesrvController {
     private final NamesrvConfig namesrvConfig;
     // 通信层配置
     private final NettyServerConfig nettyServerConfig;
-    // 服务端通信层对象
+    // 服务端通信层对象 Netty服务端通信　监听客户端的连接、关闭、异常、空闲事件时　接受客户端的消息
     private RemotingServer remotingServer;
-    // 接收Broker连接事件
+    // 接收Broker连接事件 当Broker发生连接、关闭、异常、空闲事件时，通过该对象回调来维护RouteInfoManager
     private BrokerHousekeepingService brokerHousekeepingService;
     // 服务端网络请求处理线程池
     private ExecutorService remotingExecutor;
@@ -62,7 +62,7 @@ public class NamesrvController {
      * 核心数据结构
      */
     private final KVConfigManager kvConfigManager;
-    private final RouteInfoManager routeInfoManager;
+    private final RouteInfoManager routeInfoManager;  //路由
 
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
@@ -70,6 +70,7 @@ public class NamesrvController {
         this.nettyServerConfig = nettyServerConfig;
         this.kvConfigManager = new KVConfigManager(this);
         this.routeInfoManager = new RouteInfoManager();
+        //连接失效时间绑定
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);
     }
 

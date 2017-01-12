@@ -59,7 +59,7 @@ import com.alibaba.rocketmq.remoting.protocol.RemotingCommand;
 
 /**
  * Remoting服务端实现
- * 
+ *
  * @author shijia.wxr<vintage.wang@gmail.com>
  * @since 2013-7-13
  */
@@ -71,12 +71,12 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     private final NettyServerConfig nettyServerConfig;
     // 处理Callback应答器
     private final ExecutorService publicExecutor;
-    private final ChannelEventListener channelEventListener;
+    private final ChannelEventListener channelEventListener;  //连接、关闭、异常、空闲事件回调　操作RouteInfoManager
     // 定时器
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
 
-    private RPCHook rpcHook;
+    private RPCHook rpcHook; //请求与响应事件钩子
 
     // 本地server绑定的端口
     private int port = 0;
@@ -178,8 +178,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 new NettyDecoder(), //
                                 new IdleStateHandler(0, 0, nettyServerConfig
                                     .getServerChannelMaxIdleTimeSeconds()),//
-                                new NettyConnetManageHandler(), //
-                                new NettyServerHandler());
+                                new NettyConnetManageHandler(), //处理客户端连接
+                                new NettyServerHandler());//处理命令
                         }
                     });
 
@@ -330,6 +330,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
 
 
+        //Broker或Client建立连接成功并且通道激活后　将连接消息放入队列用于通知RouteInfoManager进行路由更新
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());

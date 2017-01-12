@@ -6,7 +6,9 @@ import com.alibaba.rocketmq.common.DataVersion;
 import com.alibaba.rocketmq.common.TopicConfig;
 import com.alibaba.rocketmq.remoting.protocol.RemotingSerializable;
 
-
+/*
+* Broker的<topic,TopicConfig>
+* */
 public class TopicConfigSerializeWrapper extends RemotingSerializable {
     private ConcurrentHashMap<String, TopicConfig> topicConfigTable =
             new ConcurrentHashMap<String, TopicConfig>();

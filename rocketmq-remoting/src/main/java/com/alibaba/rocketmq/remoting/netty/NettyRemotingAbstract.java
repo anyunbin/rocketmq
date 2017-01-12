@@ -86,6 +86,7 @@ public abstract class NettyRemotingAbstract {
         this.nettyEventExecuter.putNettyEvent(event);
     }
 
+    //处理Broker和Client产生的连接、关闭、异常、空闲事件，维护RouteInfoManager路由信息
     class NettyEventExecuter extends ServiceThread {
         private final LinkedBlockingQueue<NettyEvent> eventQueue = new LinkedBlockingQueue<NettyEvent>();
         private final int MaxSize = 10000;
@@ -102,6 +103,10 @@ public abstract class NettyRemotingAbstract {
         }
 
 
+        /*
+        * 当有Broker和Client事件产生通过putNettyEvent加入到eventQueue　循环阻塞处理
+        * 调用NamesrvController.brokerHousekeepingService 调用RouteInfoManager进行路由管理
+        * */
         @Override
         public void run() {
             plog.info(this.getServiceName() + " service started");
@@ -243,6 +248,7 @@ public abstract class NettyRemotingAbstract {
     }
 
 
+    //服务端自己发出请求的响应
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
         final ResponseFuture responseFuture = responseTable.get(cmd.getOpaque());
         if (responseFuture != null) {
@@ -298,6 +304,7 @@ public abstract class NettyRemotingAbstract {
     }
 
 
+    //服务端收到消息(1)服务端先主动请求后收到的消息(2)客户端的请求消息 两者在Netty层面是同一种行为表现 在解析消息类型时做的区分
     public void processMessageReceived(ChannelHandlerContext ctx, RemotingCommand msg) throws Exception {
         final RemotingCommand cmd = msg;
         if (cmd != null) {
@@ -318,6 +325,7 @@ public abstract class NettyRemotingAbstract {
     abstract public ExecutorService getCallbackExecutor();
 
 
+    //扫描服务端请求记录缓存 将超时的记录删除
     public void scanResponseTable() {
         Iterator<Entry<Integer, ResponseFuture>> it = this.responseTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -342,13 +350,14 @@ public abstract class NettyRemotingAbstract {
     }
 
 
+    //服务端主动发出的请求 与DUBBO RPC请求过程基本相同 同步请求 等待响应
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request,
             final long timeoutMillis) throws InterruptedException, RemotingSendRequestException,
             RemotingTimeoutException {
         try {
             final ResponseFuture responseFuture =
                     new ResponseFuture(request.getOpaque(), timeoutMillis, null, null);
-            this.responseTable.put(request.getOpaque(), responseFuture);
+            this.responseTable.put(request.getOpaque(), responseFuture);  //缓存请求 在服务端收到相应后 通过主键找到该条请求记录
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
@@ -360,6 +369,7 @@ public abstract class NettyRemotingAbstract {
                         responseFuture.setSendRequestOK(false);
                     }
 
+                    //请求失败移除缓存记录
                     responseTable.remove(request.getOpaque());
                     responseFuture.setCause(f.cause());
                     responseFuture.putResponse(null);
@@ -368,7 +378,9 @@ public abstract class NettyRemotingAbstract {
                 }
             });
 
+            //设置超时时间进行阻塞等待(1)processResponseCommand收到该请求的响应会通过responseFuture唤醒该处阻塞(2)超时自动唤醒
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
+            //responseCommand为空 证明是超时唤醒的 不为空则是processResponseCommand收到响应后为responseFuture.responseCommand赋值的
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
                     throw new RemotingTimeoutException(RemotingHelper.parseChannelRemoteAddr(channel),
@@ -388,6 +400,7 @@ public abstract class NettyRemotingAbstract {
     }
 
 
+    //服务端主动发出的请求 与DUBBO RPC请求过程基本相同 异步请求 无需等待响应
     public void invokeAsyncImpl(final Channel channel, final RemotingCommand request,
             final long timeoutMillis, final InvokeCallback invokeCallback) throws InterruptedException,
             RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
@@ -457,6 +470,7 @@ public abstract class NettyRemotingAbstract {
     }
 
 
+    //服务端主动发出请求 无需返回结果
     public void invokeOnewayImpl(final Channel channel, final RemotingCommand request,
             final long timeoutMillis) throws InterruptedException, RemotingTooMuchRequestException,
             RemotingTimeoutException, RemotingSendRequestException {
