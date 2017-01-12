@@ -230,6 +230,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     }
 
 
+
+    //初始化默认的执行体
     @Override
     public void registerDefaultProcessor(NettyRequestProcessor processor, ExecutorService executor) {
         this.defaultRequestProcessor = new Pair<NettyRequestProcessor, ExecutorService>(processor, executor);

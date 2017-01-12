@@ -119,6 +119,7 @@ public class NamesrvController {
 
 
     private void registerProcessor() {
+        //命令执行体
         this.remotingServer
             .registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
     }
