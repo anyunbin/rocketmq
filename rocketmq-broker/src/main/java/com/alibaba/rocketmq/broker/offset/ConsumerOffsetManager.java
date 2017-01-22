@@ -44,6 +44,7 @@ public class ConsumerOffsetManager extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BrokerLoggerName);
     private static final String TOPIC_GROUP_SEPARATOR = "@";
 
+    //<topic@group,<queueId,offset>>
     private ConcurrentHashMap<String/* topic@group */, ConcurrentHashMap<Integer, Long>> offsetTable =
             new ConcurrentHashMap<String, ConcurrentHashMap<Integer, Long>>(512);
 
@@ -99,7 +100,7 @@ public class ConsumerOffsetManager extends ConfigManager {
         return result;
     }
 
-
+    //group consumer which topic
     public Set<String> whichTopicByConsumer(final String group) {
         Set<String> topics = new HashSet<String>();
 
@@ -118,7 +119,7 @@ public class ConsumerOffsetManager extends ConfigManager {
         return topics;
     }
 
-
+    //topic consumed by those group
     public Set<String> whichGroupByTopic(final String topic) {
         Set<String> groups = new HashSet<String>();
 
@@ -159,6 +160,7 @@ public class ConsumerOffsetManager extends ConfigManager {
     }
 
 
+    //offset 写入缓存
     private void commitOffset(final String key, final int queueId, final long offset) {
         ConcurrentHashMap<Integer, Long> map = this.offsetTable.get(key);
         if (null == map) {

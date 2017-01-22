@@ -107,7 +107,7 @@ public class MessageStoreConfig {
     // 非可靠模式下，异常宕机恢复快
     @ImportantField
     private boolean messageIndexSafe = false;
-    // HA功能
+    // HA功能(high available)
     private int haListenPort = 10912;
     private int haSendHeartbeatInterval = 1000 * 5;
     private int haHousekeepingInterval = 1000 * 20;

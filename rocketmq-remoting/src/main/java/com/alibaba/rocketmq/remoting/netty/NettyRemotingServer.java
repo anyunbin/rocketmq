@@ -176,8 +176,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 defaultEventExecutorGroup, //
                                 new NettyEncoder(), //
                                 new NettyDecoder(), //
-                                new IdleStateHandler(0, 0, nettyServerConfig
-                                    .getServerChannelMaxIdleTimeSeconds()),//
+                                new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
+                                //触发 userEventTriggered 事件
                                 new NettyConnetManageHandler(), //处理客户端连接
                                 new NettyServerHandler());//处理命令
                         }
@@ -346,6 +346,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
 
 
+        //连接关闭
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
@@ -359,6 +360,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
 
 
+
+        //空闲
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt instanceof IdleStateEvent) {

@@ -131,7 +131,7 @@ public class MQClientInstance {
                 .getClientCallbackExecutorThreads());
         this.clientRemotingProcessor = new ClientRemotingProcessor(this);
         this.mQClientAPIImpl =
-                new MQClientAPIImpl(this.nettyClientConfig, this.clientRemotingProcessor, rpcHook);
+                new MQClientAPIImpl(this.nettyClientConfig, this.clientRemotingProcessor, rpcHook); //api
 
         if (this.clientConfig.getNamesrvAddr() != null) {
             this.mQClientAPIImpl.updateNameServerAddressList(this.clientConfig.getNamesrvAddr());
@@ -140,7 +140,7 @@ public class MQClientInstance {
 
         this.clientId = clientId;
 
-        this.mQAdminImpl = new MQAdminImpl(this);
+        this.mQAdminImpl = new MQAdminImpl(this);  //api
 
         this.pullMessageService = new PullMessageService(this);
 

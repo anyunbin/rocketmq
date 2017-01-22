@@ -89,7 +89,7 @@ public class NamesrvController {
 
         this.registerProcessor();
 
-        // 增加定时任务
+        // 增加定时任务 处理不活跃Broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

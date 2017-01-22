@@ -58,10 +58,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     private final Logger log = ClientLogger.getLog();
     private final DefaultMQProducer defaultMQProducer;
     private final ConcurrentHashMap<String/* topic */, TopicPublishInfo> topicPublishInfoTable =
-            new ConcurrentHashMap<String, TopicPublishInfo>();
+            new ConcurrentHashMap<String, TopicPublishInfo>();     //该Producer publish的所有topic List<MessageQueue>
     protected BlockingQueue<Runnable> checkRequestQueue;
     protected ExecutorService checkExecutor;
-    private ServiceState serviceState = ServiceState.CREATE_JUST;
+    private ServiceState serviceState = ServiceState.CREATE_JUST;  //状态
     private MQClientInstance mQClientFactory;
 
     private final ArrayList<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();
@@ -172,6 +172,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 this.defaultMQProducer.changeInstanceNameToPID();
             }
 
+            //每个clientId对应一个MQClientInstance实例
             this.mQClientFactory =
                     MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer,
                         rpcHook);
@@ -590,8 +591,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
     private TopicPublishInfo tryToFindTopicPublishInfo(final String topic) {
         TopicPublishInfo topicPublishInfo = this.topicPublishInfoTable.get(topic);
+
         if (null == topicPublishInfo || !topicPublishInfo.ok()) {
             this.topicPublishInfoTable.putIfAbsent(topic, new TopicPublishInfo());
+            //如果没有topic的MessageQueue信息向NameServerv获取
             this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic);
             topicPublishInfo = this.topicPublishInfoTable.get(topic);
         }
@@ -613,7 +616,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             final SendCallback sendCallback,//
             final long timeout) throws MQClientException, RemotingException, MQBrokerException,
             InterruptedException {
-        String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
+        String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());  //broker master address
         if (null == brokerAddr) {
             tryToFindTopicPublishInfo(mq.getTopic());
             brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());

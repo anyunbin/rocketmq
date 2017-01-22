@@ -44,6 +44,7 @@ public class ProducerManager {
     private static final long LockTimeoutMillis = 3000;
     private static final long ChannelExpiredTimeout = 1000 * 120;
     private final Lock groupChannelLock = new ReentrantLock();
+    //<group,<Channel,ClientChannelInfo>>
     private final HashMap<String /* group name */, HashMap<Channel, ClientChannelInfo>> groupChannelTable =
             new HashMap<String, HashMap<Channel, ClientChannelInfo>>();
 

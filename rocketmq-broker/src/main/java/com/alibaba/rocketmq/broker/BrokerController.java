@@ -89,25 +89,25 @@ public class BrokerController {
     private final BrokerConfig brokerConfig;
     private final NettyServerConfig nettyServerConfig;
     private final NettyClientConfig nettyClientConfig;
-    private final MessageStoreConfig messageStoreConfig;
+    private final MessageStoreConfig messageStoreConfig;   //消息持久化配置
     private final DataVersion configDataVersion = new DataVersion();
-    private final ConsumerOffsetManager consumerOffsetManager;
-    private final ConsumerManager consumerManager;
-    private final ProducerManager producerManager;
-    private final ClientHousekeepingService clientHousekeepingService;
+    private final ConsumerOffsetManager consumerOffsetManager;  //记录消费着的消费offset
+    private final ConsumerManager consumerManager;   //消费者管理
+    private final ProducerManager producerManager;   //生产者管理
+    private final ClientHousekeepingService clientHousekeepingService;  //客户端存活监控
     private final PullMessageProcessor pullMessageProcessor;
     private final PullRequestHoldService pullRequestHoldService;
-    private final Broker2Client broker2Client;
-    private final SubscriptionGroupManager subscriptionGroupManager;
-    private final ConsumerIdsChangeListener consumerIdsChangeListener;
-    private final RebalanceLockManager rebalanceLockManager = new RebalanceLockManager();
+    private final Broker2Client broker2Client;   //Broker与Client
+    private final SubscriptionGroupManager subscriptionGroupManager;     //"组"概念管理
+    private final ConsumerIdsChangeListener consumerIdsChangeListener;   //监听消费端事件
+    private final RebalanceLockManager rebalanceLockManager = new RebalanceLockManager();  //负载均衡
     private final BrokerOuterAPI brokerOuterAPI;
     private final ScheduledExecutorService scheduledExecutorService = Executors
         .newSingleThreadScheduledExecutor(new ThreadFactoryImpl("BrokerControllerScheduledThread"));
     private final SlaveSynchronize slaveSynchronize;
-    private MessageStore messageStore;
-    private RemotingServer remotingServer;
-    private TopicConfigManager topicConfigManager;
+    private MessageStore messageStore;            //消息存储
+    private RemotingServer remotingServer;        //Netty通信层
+    private TopicConfigManager topicConfigManager;  //Topic管理
     private ExecutorService sendMessageExecutor;
     private ExecutorService pullMessageExecutor;
     private ExecutorService adminBrokerExecutor;
@@ -135,14 +135,15 @@ public class BrokerController {
         this.nettyServerConfig = nettyServerConfig;
         this.nettyClientConfig = nettyClientConfig;
         this.messageStoreConfig = messageStoreConfig;
+
         this.consumerOffsetManager = new ConsumerOffsetManager(this);
         this.topicConfigManager = new TopicConfigManager(this);
         this.pullMessageProcessor = new PullMessageProcessor(this);
         this.pullRequestHoldService = new PullRequestHoldService(this);
-        this.consumerIdsChangeListener = new DefaultConsumerIdsChangeListener(this);
+        this.consumerIdsChangeListener = new DefaultConsumerIdsChangeListener(this);  //消费端空闲时间回调
         this.consumerManager = new ConsumerManager(this.consumerIdsChangeListener);
         this.producerManager = new ProducerManager();
-        this.clientHousekeepingService = new ClientHousekeepingService(this);
+        this.clientHousekeepingService = new ClientHousekeepingService(this);  //对于Broker的客户端产生连接、关闭、异常、空闲事件需要通知的是
         this.broker2Client = new Broker2Client(this);
         this.subscriptionGroupManager = new SubscriptionGroupManager(this);
         this.brokerOuterAPI = new BrokerOuterAPI(nettyClientConfig);

@@ -108,8 +108,8 @@ public class BrokerStartup {
 
             // 初始化配置文件
             final BrokerConfig brokerConfig = new BrokerConfig();
-            final NettyServerConfig nettyServerConfig = new NettyServerConfig();
-            final NettyClientConfig nettyClientConfig = new NettyClientConfig();
+            final NettyServerConfig nettyServerConfig = new NettyServerConfig();  //Producer Consumer连接的服务端
+            final NettyClientConfig nettyClientConfig = new NettyClientConfig();  //
             nettyServerConfig.setListenPort(10911);
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 

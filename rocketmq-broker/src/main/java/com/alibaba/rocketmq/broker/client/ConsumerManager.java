@@ -43,6 +43,7 @@ import com.alibaba.rocketmq.remoting.common.RemotingUtil;
  */
 public class ConsumerManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BrokerLoggerName);
+    //<group,consumerGroupInfo>
     private final ConcurrentHashMap<String/* Group */, ConsumerGroupInfo> consumerTable =
             new ConcurrentHashMap<String, ConsumerGroupInfo>(1024);
 
@@ -80,6 +81,7 @@ public class ConsumerManager {
     }
 
 
+    //group consume topic count
     public int findSubscriptionDataCount(final String group) {
         ConsumerGroupInfo consumerGroupInfo = this.getConsumerGroupInfo(group);
         if (consumerGroupInfo != null) {
@@ -185,6 +187,7 @@ public class ConsumerManager {
     }
 
 
+    //topic consumed by those group
     public HashSet<String> queryTopicConsumeByWho(final String topic) {
         HashSet<String> groups = new HashSet<String>();
         Iterator<Entry<String, ConsumerGroupInfo>> it = this.consumerTable.entrySet().iterator();

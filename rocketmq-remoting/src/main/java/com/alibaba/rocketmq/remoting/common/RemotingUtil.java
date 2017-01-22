@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 网络相关方法
- * 
+ *
  * @author shijia.wxr<vintage.wang@gmail.com>
  * @since 2013-7-13
  */
@@ -87,13 +87,11 @@ public class RemotingUtil {
                                 result = selectorProvider.openSelector();
                             }
                         }
-                    }
-                    catch (final Exception e) {
+                    } catch (final Exception e) {
                         // ignore
                     }
                 }
-            }
-            catch (final Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }
@@ -106,6 +104,7 @@ public class RemotingUtil {
     }
 
 
+    //获取本机ipv4
     public static String getLocalAddress() {
         try {
             // Traversal Network interface to get the first non-loopback and non-private address
@@ -120,8 +119,7 @@ public class RemotingUtil {
                     if (!address.isLoopbackAddress()) {
                         if (address instanceof Inet6Address) {
                             ipv6Result.add(normalizeHostAddress(address));
-                        }
-                        else {
+                        } else {
                             ipv4Result.add(normalizeHostAddress(address));
                         }
                     }
@@ -139,17 +137,15 @@ public class RemotingUtil {
                 }
 
                 return ipv4Result.get(ipv4Result.size() - 1);
-            }else if (!ipv6Result.isEmpty()) {
+            } else if (!ipv6Result.isEmpty()) {
                 return ipv6Result.get(0);
             }
             //If failed to find,fall back to localhost
             final InetAddress localHost = InetAddress.getLocalHost();
             return normalizeHostAddress(localHost);
-        }
-        catch (SocketException e) {
+        } catch (SocketException e) {
             e.printStackTrace();
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
@@ -160,8 +156,7 @@ public class RemotingUtil {
     public static String normalizeHostAddress(final InetAddress localHost) {
         if (localHost instanceof Inet6Address) {
             return "[" + localHost.getHostAddress() + "]";
-        }
-        else {
+        } else {
             return localHost.getHostAddress();
         }
     }
@@ -204,13 +199,11 @@ public class RemotingUtil {
             sc.socket().connect(remote, timeoutMillis);
             sc.configureBlocking(false);
             return sc;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (sc != null) {
                 try {
                     sc.close();
-                }
-                catch (IOException e1) {
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
@@ -226,9 +219,13 @@ public class RemotingUtil {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 log.info("closeChannel: close the connection to remote address[{}] result: {}", addrRemote,
-                    future.isSuccess());
+                        future.isSuccess());
             }
         });
+    }
+
+    public static void main(String[] args) {
+        System.out.println(RemotingUtil.getLocalAddress());
     }
 
 }
