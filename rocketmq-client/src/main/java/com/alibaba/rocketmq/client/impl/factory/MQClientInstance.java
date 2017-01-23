@@ -204,6 +204,7 @@ public class MQClientInstance {
 
     private void startScheduledTask() {
         if (null == this.clientConfig.getNamesrvAddr()) {
+            //
             this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
                 @Override

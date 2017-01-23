@@ -82,7 +82,7 @@ public class MQClientAPIImpl {
     }
 
     private final static Logger log = ClientLogger.getLog();
-    private final RemotingClient remotingClient;
+    private final RemotingClient remotingClient;  //网络连接
     private final TopAddressing topAddressing = new TopAddressing(MixAll.WS_ADDR);
     private final ClientRemotingProcessor clientRemotingProcessor;
     private String nameSrvAddr = null;

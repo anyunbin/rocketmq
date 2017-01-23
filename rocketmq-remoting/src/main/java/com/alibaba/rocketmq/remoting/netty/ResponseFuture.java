@@ -26,6 +26,10 @@ import com.alibaba.rocketmq.remoting.protocol.RemotingCommand;
 
 /**
  * 异步请求应答封装
+ *
+ * 对于MQ层面的异步、同步请求都是用的是该对象
+ * 同步请求：网络请求后直接wait进行阻塞等待返回结果
+ * 异步请求：网络请求后直接返回null
  * 
  * @author shijia.wxr<vintage.wang@gmail.com>
  * @since 2013-7-13

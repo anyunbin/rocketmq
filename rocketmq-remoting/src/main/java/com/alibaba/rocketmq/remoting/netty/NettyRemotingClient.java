@@ -83,6 +83,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
 
     private final Lock lockChannelTables = new ReentrantLock();
+    //缓存 <addr,Channel> 地址 To 长连接
     private final ConcurrentHashMap<String /* addr */, ChannelWrapper> channelTables =
             new ConcurrentHashMap<String, ChannelWrapper>();
 
@@ -131,6 +132,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    //接收消息
     class NettyClientHandler extends SimpleChannelInboundHandler<RemotingCommand> {
 
         @Override
@@ -140,6 +142,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }
     }
 
+    //事件监听
     class NettyConnetManageHandler extends ChannelDuplexHandler {
         @Override
         public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
@@ -647,7 +650,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     public void invokeAsync(String addr, RemotingCommand request, long timeoutMillis,
             InvokeCallback invokeCallback) throws InterruptedException, RemotingConnectException,
             RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
-        final Channel channel = this.getAndCreateChannel(addr);
+        final Channel channel = this.getAndCreateChannel(addr);  //连接在不存在时创建
         if (channel != null && channel.isActive()) {
             try {
                 if (this.rpcHook != null) {
