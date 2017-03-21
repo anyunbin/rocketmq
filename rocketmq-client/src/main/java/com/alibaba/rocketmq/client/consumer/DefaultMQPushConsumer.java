@@ -71,7 +71,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
     /**
      * Queue allocation algorithm
      */
-    private AllocateMessageQueueStrategy allocateMessageQueueStrategy;
+    private AllocateMessageQueueStrategy allocateMessageQueueStrategy;  //MessageQueue分配策略
 
     /**
      * Subscription relationship
@@ -142,7 +142,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
 
     public DefaultMQPushConsumer(final String consumerGroup) {
-        this(consumerGroup, null, new AllocateMessageQueueAveragely());
+        this(consumerGroup, null, new AllocateMessageQueueAveragely()/*默认的负载方式*/);
     }
 
 

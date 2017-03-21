@@ -115,7 +115,7 @@ public class MQClientInstance {
             });
     private final ClientRemotingProcessor clientRemotingProcessor;
     private final PullMessageService pullMessageService;
-    private final RebalanceService rebalanceService;
+    private final RebalanceService rebalanceService;   //定期对Topic负载均衡
     private final DefaultMQProducer defaultMQProducer;
     private ServiceState serviceState = ServiceState.CREATE_JUST;
     private DatagramSocket datagramSocket;

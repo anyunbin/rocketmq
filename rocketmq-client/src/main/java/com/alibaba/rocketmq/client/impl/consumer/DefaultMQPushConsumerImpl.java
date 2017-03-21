@@ -88,13 +88,13 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
     private final DefaultMQPushConsumer defaultMQPushConsumer;
     private final RebalanceImpl rebalanceImpl = new RebalancePushImpl(this);
     private ServiceState serviceState = ServiceState.CREATE_JUST;
-    private MQClientInstance mQClientFactory;
-    private PullAPIWrapper pullAPIWrapper;
+    private MQClientInstance mQClientFactory;  //相同ClientId(ip@pid，因此同一个jvm共享一个)共享一个MQClientInstance实例
+    private PullAPIWrapper pullAPIWrapper; //拉取消息
     private volatile boolean pause = false;
     private boolean consumeOrderly = false;
-    private MessageListener messageListenerInner;
+    private MessageListener messageListenerInner;  //消息回调
     private OffsetStore offsetStore;
-    private ConsumeMessageService consumeMessageService;
+    private ConsumeMessageService consumeMessageService; //消费消息
 
     private final ArrayList<FilterMessageHook> filterMessageHookList = new ArrayList<FilterMessageHook>();
 
