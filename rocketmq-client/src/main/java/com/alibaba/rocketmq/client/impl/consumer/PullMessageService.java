@@ -34,6 +34,7 @@ import com.alibaba.rocketmq.common.ServiceThread;
  */
 public class PullMessageService extends ServiceThread {
     private final Logger log = ClientLogger.getLog();
+    //这是个什么东西　谁生产　谁消费　
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
     private final MQClientInstance mQClientFactory;
     private final ScheduledExecutorService scheduledExecutorService = Executors

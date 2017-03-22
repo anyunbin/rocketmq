@@ -34,7 +34,7 @@ public class SimpleConsumerProducerTest {
         final AtomicLong lastReceivedMills = new AtomicLong(System.currentTimeMillis());
 
 
-        consumer.registerMessageListener(new MessageListenerConcurrently() /*MessageListenerOrderly、MessageListenerConcurrently*/{
+        consumer.registerMessageListener(new MessageListenerConcurrently() /*MessageListenerOrderly顺序消费、MessageListenerConcurrently并发消费*/{
             public ConsumeConcurrentlyStatus consumeMessage(final List<MessageExt> msgs,
                                                             final ConsumeConcurrentlyContext context) {
                 System.out.println("Received " + msgs.get(0) + " messages !");

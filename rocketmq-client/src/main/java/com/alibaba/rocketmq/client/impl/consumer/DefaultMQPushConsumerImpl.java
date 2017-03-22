@@ -655,6 +655,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 this.defaultMQPushConsumer.changeInstanceNameToPID();
             }
 
+            //保证每个clientId共用一个MQClientInstance
             this.mQClientFactory =
                     MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQPushConsumer,
                         this.rpcHook);
@@ -706,6 +707,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
 
             this.consumeMessageService.start();
 
+            //注册Consumer
             boolean registerOK =
                     mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
             if (!registerOK) {
